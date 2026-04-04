@@ -22,8 +22,6 @@ x=dataset.drop(['7. Which advertisement appeals to you the most?'], axis=1)
 y=dataset['7. Which advertisement appeals to you the most?']
 
 # Ensure x and y are derived from a consistent source, e.g., the 'data' DataFrame
-x = dataset.drop('responded', axis=1)
-y = dataset['responded']
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
 
 model = tf.keras.models.Sequential([
