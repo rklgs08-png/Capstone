@@ -9,7 +9,7 @@ Original file is located at
 import streamlit as st
 import pandas as pd
 import os
-from sklear.model_selection import train_test_split
+from sklearn.model_selection import train_test_split
 import tensorflow as tf
 file_path="395k0As85_Text_When Brands Take Sides Public Reactions to Political Advertising_43_43.xlsx"
 st.write("file_path =", file_path)
@@ -19,6 +19,7 @@ dataset = pd.read_excel(file_path)
 x=dataset.drop(['7. Which advertisement appeals to you the most?'], axis=1)
 
 y=dataset['7. Which advertisement appeals to you the most?']
+from sklearn.model_selection import LabelEncoder 
 le=LabelEncoder()
 y_encoded=le.fit_transform(y)
 
