@@ -8,6 +8,8 @@ Original file is located at
 """
 import os
 file_path = os.path.join(os.getcwd(), "395k0As85_Text_When Brands Take Sides Public Reactions to Political Advertising_43_43.xlsx")
+st.write("file_path =", file_path)
+st.write("Does file exist?", os.path.exists(file_path))
 dataset = pd.read_excel(file_path)
 import pandas as pd
 dataset=pd.read_excel("395k0As85_Text_When Brands Take Sides Public Reactions to Political Advertising_43_43.xlsx")
