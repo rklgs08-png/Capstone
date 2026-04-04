@@ -8,6 +8,10 @@ Original file is located at
 """
 import streamlit as st
 import pandas as pd
+import os
+from sklear.model_selection import train_test_split
+import tensorflow as tf
+file_path="395k0As85_Text_When Brands Take Sides Public Reactions to Political Advertising_43_43.xlsx"
 st.write("file_path =", file_path)
 st.write("Does file exist?", os.path.exists(file_path))
 dataset = pd.read_excel(file_path)
@@ -17,16 +21,11 @@ x=dataset.drop(['7. Which advertisement appeals to you the most?'], axis=1)
 
 y=dataset['7. Which advertisement appeals to you the most?']
 
-from sklearn.model_selection import train_test_split
 # Ensure x and y are derived from a consistent source, e.g., the 'data' DataFrame
 x = dataset.drop('responded', axis=1)
 y = dataset['responded']
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
 
-import tensorflow as tf
-model=tf.keras.models.Sequential()
-
-import tensorflow as tf
 model = tf.keras.models.Sequential([
     tf.keras.Input(shape=(x_train.shape[1],)),
     tf.keras.layers.Dense(256, activation='relu'),
@@ -36,7 +35,7 @@ model = tf.keras.models.Sequential([
 
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
-model.fit(x_train, y_train,)
+model.fit(x_train, y_train,epochs=10, batch_size=32, validation_data=(x_test,y_test))
 
 model.evaluate(x_test, y_test)
 
