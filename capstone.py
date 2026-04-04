@@ -29,14 +29,14 @@ model=tf.keras.models.Sequential()
 import tensorflow as tf
 model = tf.keras.models.Sequential([
     tf.keras.Input(shape=(x_train.shape[1],)),
-    tf.keras.layers.Dense(256, activation='sigmoid'),
-    tf.keras.layers.Dense(256, activation='sigmoid'),
+    tf.keras.layers.Dense(256, activation='relu'),
+    tf.keras.layers.Dense(256, activation='relu'),
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
 
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
-model.fit(x_train, y_train, epochs=1000)
+model.fit(x_train, y_train,)
 
 model.evaluate(x_test, y_test)
 
