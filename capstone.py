@@ -15,14 +15,15 @@ file_path="395k0As85_Text_When Brands Take Sides Public Reactions to Political A
 st.write("file_path =", file_path)
 st.write("Does file exist?", os.path.exists(file_path))
 dataset = pd.read_excel(file_path)
-dataset=pd.read_excel("395k0As85_Text_When Brands Take Sides Public Reactions to Political Advertising_43_43.xlsx")
 
 x=dataset.drop(['7. Which advertisement appeals to you the most?'], axis=1)
 
 y=dataset['7. Which advertisement appeals to you the most?']
+le=LabelEncoder()
+y_encoded=le.fit_transform(y)
 
 # Ensure x and y are derived from a consistent source, e.g., the 'data' DataFrame
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+x_train, x_test, y_train, y_test = train_test_split(x, y_encoded, test_size=0.2, random_state=42)
 
 model = tf.keras.models.Sequential([
     tf.keras.Input(shape=(x_train.shape[1],)),
