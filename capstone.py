@@ -31,9 +31,12 @@ if uploaded_file is not None:
         st.success(f"Model trained! Accuracy: {accuracy:.2f}")
         st.write("Ad classes:", list(le.classes_))  
         
+    
+        st.session_state.x_processed = x_processed
         st.session_state.model = model
         st.session_state.le = le
         st.session_state.classes = le.classes_
+
 
 if 'model' in st.session_state:
     st.header("Make Prediction")
@@ -42,15 +45,7 @@ if 'model' in st.session_state:
     new_gender = st.text_input("Gender")
     
     if st.button("Predict"):
-        new_data = pd.DataFrame({
-          if 'model' in st.session_state:
-    st.header("Make Prediction")
-    new_country = st.text_input("Country")
-    new_age = st.selectbox("Age", ["Under 18", "18-24", "25-34", "35-44", "45-54", "55-64"])
-    new_gender = st.text_input("Gender")
-    
-    if st.button("Predict"):
-        if 'x_processed' not in locals():
+        if 'x_processed' not in st.session_state:
             st.error("Please click 'Train model' first!")
         else:
             new_data = pd.DataFrame({
@@ -59,7 +54,7 @@ if 'model' in st.session_state:
                 '3. How would you describe your gender identity?': [new_gender]
             })
             new_processed = pd.get_dummies(new_data, drop_first=True).astype(float)
-            new_processed = new_processed.reindex(columns=x_processed.columns, fill_value=0)
+            new_processed = new_processed.reindex(columns=st.session_state.x_processed.columns, fill_value=0)
             
             pred = st.session_state.model.predict(new_processed)
             pred_class = st.session_state.classes[pred[0]]
