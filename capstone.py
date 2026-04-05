@@ -25,7 +25,7 @@ if uploaded_file is not None:
         model.fit(x_train,y_train)
         y_pred=model.predict(x_test)
         accuracy=accuracy_score(y_test,y_pred)
-        st.success(f "Model trained! Accuracy: {accuracy:.2f}")
+        st.success(f"Model trained! Accuracy: {accuracy:.2f}")
         st.write ("Ad classes:", list (le_classes_))
 
         st.session_state.model=model
