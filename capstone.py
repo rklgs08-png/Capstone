@@ -39,8 +39,8 @@ if uploaded_file is not None:
         if st.button ("Predict"):
             new_data=pd.DataFrame({
                 '1.Where are you from?': [new_country],
-                '2.How old are you?": [new_age],
-                "3.How would you describe your gender identity?': [new_gender]})
+                '2.How old are you?': [new_age],
+                '3.How would you describe your gender identity?': [new_gender]})
                 new_processed=pd.get_dummies (new_data, drop_first=True). astype (float)
                 new_processed=new_processed.reindex(columns=x_processed.columns, fill_value=0)
 
