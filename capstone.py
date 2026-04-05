@@ -6,12 +6,12 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
-st.title("Commercial Appeal Predictor")  # Fixed: ()
+st.title("Commercial Appeal Predictor") 
 
-uploaded_file = st.file_uploader("Upload Excel file", type="xlsx")  # Fixed: filename + "xlsx"
+uploaded_file = st.file_uploader("Upload Excel file", type="xlsx") 
 if uploaded_file is not None:
     dataset = pd.read_excel(uploaded_file)
-    st.write("Data loaded:", dataset.shape)  # Fixed: tuple → string
+    st.write("Data loaded:", dataset.shape) 
     
     x = dataset.drop(['7. Which advertisement appeals to you the most?'], axis=1)
     y = dataset['7. Which advertisement appeals to you the most?']
@@ -29,7 +29,7 @@ if uploaded_file is not None:
         y_pred = model.predict(x_test)
         accuracy = accuracy_score(y_test, y_pred)
         st.success(f"Model trained! Accuracy: {accuracy:.2f}")
-        st.write("Ad classes:", list(le.classes_))  # Fixed: spaces
+        st.write("Ad classes:", list(le.classes_))  
         
         st.session_state.model = model
         st.session_state.le = le
@@ -46,7 +46,7 @@ if 'model' in st.session_state:
             '1. Where are you from?': [new_country],
             '2. How old are you?': [new_age],
             '3. How would you describe your gender identity?': [new_gender]
-        })  # Fixed: ) moved to correct line
+        }) 
         new_processed = pd.get_dummies(new_data, drop_first=True).astype(float)
         new_processed = new_processed.reindex(columns=x_processed.columns, fill_value=0)
         
