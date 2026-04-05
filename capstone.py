@@ -30,7 +30,7 @@ model = tf.keras.models.Sequential([
     tf.keras.Input(shape=(x_train.shape[1],)),
     tf.keras.layers.Dense(256, activation='relu'),
     tf.keras.layers.Dense(256, activation='relu'),
-    tf.keras.layers.Dense(1, activation='sigmoid')
+    tf.keras.layers.Dense(1, activation='softmax')
 ])
 
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
