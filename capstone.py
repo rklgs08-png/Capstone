@@ -10,30 +10,28 @@ import streamlit as st
 import pandas as pd
 import os
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
 import tensorflow as tf
-file_path="395k0As85_Text_When Brands Take Sides Public Reactions to Political Advertising_43_43.xlsx"
-st.write("file_path =", file_path)
-st.write("Does file exist?", os.path.exists(file_path))
-dataset = pd.read_excel(file_path)
+import numpy as np
 
-x=dataset.drop(['7. Which advertisement appeals to you the most?'], axis=1)
-
-y=dataset['7. Which advertisement appeals to you the most?']
-from sklearn.model_selection import LabelEncoder 
-le=LabelEncoder()
-y_encoded=le.fit_transform(y)
-
-# Ensure x and y are derived from a consistent source, e.g., the 'data' DataFrame
-x_train, x_test, y_train, y_test = train_test_split(x, y_encoded, test_size=0.2, random_state=42)
-
+uploaded_file=st.file_uploader("395k0As85_Text_When Brands Take Sides Public Reactions to Political Advertising_43_43.xlsx")
+if uploaded_file:
+    dataset = pd.read_excel(uploaded_file)
+    x=dataset.drop(['7. Which advertisement appeals to you the most?'], axis=1)
+    y=dataset['7. Which advertisement appeals to you the most?']
+    le=LabelEncoder()
+    y_encoded=le.fit_transform(y)
+    x_processed= pd.get_dummies(x, drop_first=True).astype(float)
+    x_train, x_test, y_train, y_test = train_test_split(x_processed, y_encoded, test_size=0.2, random_state=42)
+num_classes=len(le.classes_)
 model = tf.keras.models.Sequential([
     tf.keras.Input(shape=(x_train.shape[1],)),
     tf.keras.layers.Dense(256, activation='relu'),
     tf.keras.layers.Dense(256, activation='relu'),
-    tf.keras.layers.Dense(1, activation='softmax')
+    tf.keras.layers.Dense(num_classes, activation='softmax')
 ])
 
-model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
 model.fit(x_train, y_train,epochs=10, batch_size=32, validation_data=(x_test,y_test))
 
