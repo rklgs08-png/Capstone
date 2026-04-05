@@ -23,17 +23,13 @@ if uploaded_file:
     y_encoded=le.fit_transform(y)
     x_processed= pd.get_dummies(x, drop_first=True).astype(float)
     x_train, x_test, y_train, y_test = train_test_split(x_processed, y_encoded, test_size=0.2, random_state=42)
-num_classes=len(le.classes_)
-model = tf.keras.models.Sequential([
+    num_classes=len(le.classes_)
+    model = tf.keras.models.Sequential([
     tf.keras.Input(shape=(x_train.shape[1],)),
     tf.keras.layers.Dense(256, activation='relu'),
     tf.keras.layers.Dense(256, activation='relu'),
-    tf.keras.layers.Dense(num_classes, activation='softmax')
-])
-
-model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-
-model.fit(x_train, y_train,epochs=10, batch_size=32, validation_data=(x_test,y_test))
-
-model.evaluate(x_test, y_test)
+    tf.keras.layers.Dense(num_classes, activation='softmax')])
+    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    model.fit(x_train, y_train,epochs=10, batch_size=32, validation_data=(x_test,y_test))
+    model.evaluate(x_test, y_test)
 
