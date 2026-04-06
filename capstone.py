@@ -31,12 +31,10 @@ if uploaded_file is not None:
         st.success(f"Model trained! Accuracy: {accuracy:.2f}")
         st.write("Ad classes:", list(le.classes_))  
         
-    
         st.session_state.x_processed = x_processed
         st.session_state.model = model
         st.session_state.le = le
         st.session_state.classes = le.classes_
-
 
 if 'model' in st.session_state:
     st.header("Make Prediction")
