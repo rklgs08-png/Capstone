@@ -50,7 +50,7 @@ if 'model' in st.session_state:
             new_data = pd.DataFrame({
                 '1. Where are you from?': [new_country],
                 '2. How old are you?': [new_age],
-                '3. How would you describe your gender identity?': [new_gender]
+                '3. How would you describe your gender identity?': [new_gender],
                 '4. Which category best describes your total annual household income before taxes (in CAD)?': [new_income]
             })
             new_processed = pd.get_dummies(new_data, drop_first=True).astype(float)
