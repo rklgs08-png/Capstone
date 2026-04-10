@@ -41,6 +41,7 @@ if 'model' in st.session_state:
     new_country = st.text_input("Country")
     new_age = st.selectbox("Age", ["Under 18", "18-24", "25-34", "35-44", "45-54", "55-64"])
     new_gender = st.text_input("Gender")
+    new_income = st.selectbox("Annual Household Income Before Taxes", ["Under $15,000", "between $15,000 and $29,000", "between $30,000 and $49,000", "between $50,000 and $74,000", "between $75,000 and $99,999", "Over $100,000"]) 
     
     if st.button("Predict"):
         if 'x_processed' not in st.session_state:
