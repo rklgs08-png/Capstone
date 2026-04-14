@@ -41,8 +41,6 @@ if 'model' in st.session_state:
     new_country = st.text_input("Country")
     new_age = st.selectbox("Age", ["Under 18", "18-24", "25-34", "35-44", "45-54", "55-64"])
     new_gender = st.text_input("Gender")
-    new_income = st.selectbox("Annual Household Income Before Taxes", ["Under $15,000", "between $15,000 and $29,000", "between $30,000 and $49,000", "between $50,000 and $74,000", "between $75,000 and $99,999", "Over $100,000"]) 
-    new_education = st.selectbox("Highest Education Level", ["High school", "Apprenticeship", "Associates degree", "Bachelor degree", "Graduate or professional degree (e.g. MA or PhD)"]) 
     
     if st.button("Predict"):
         if 'x_processed' not in st.session_state:
@@ -51,9 +49,7 @@ if 'model' in st.session_state:
             new_data = pd.DataFrame({
                 '1. Where are you from?': [new_country],
                 '2. How old are you?': [new_age],
-                '3. How would you describe your gender identity?': [new_gender],
-                '4. Which category best describes your total annual household income before taxes (in CAD)?': [new_income],
-                '5. What is the highest level of education you have?': [new_education]
+                '3. How would you describe your gender identity?': [new_gender]
             })
             new_processed = pd.get_dummies(new_data, drop_first=True).astype(float)
             new_processed = new_processed.reindex(columns=st.session_state.x_processed.columns, fill_value=0)
