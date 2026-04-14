@@ -15,6 +15,7 @@ if uploaded_file is not None:
     
     x = dataset.drop(['7. Which advertisement appeals to you the most?'], axis=1)
     y = dataset['7. Which advertisement appeals to you the most?']
+    y = y.astype(str).str.split('┋').str[0].str.strip()
     
     if st.button("Train model"):
         st.write("Training...")
