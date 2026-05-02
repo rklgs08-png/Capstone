@@ -1,94 +1,94 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
 
-st.title("Commercial Issue Predictor") 
+st.title("Commercial Issue Predictor")
 
-uploaded_file = st.file_uploader("Upload Excel file", type="xlsx") 
+uploaded_file = st.file_uploader("Upload Excel file", type="xlsx")
 
 if uploaded_file is not None:
+    # Read the file
     dataset = pd.read_excel(uploaded_file)
-    st.write("Data loaded:", dataset.shape) 
-  
     
-    target_col = '5. What issue does the commercial address?'
-    
-    if target_col not in dataset.columns:
-        st.error(f"Could not find column: '{target_col}'")
-        st.write("Available columns:", list(dataset.columns))
-    else:
-        st.success(f"Found {target_col}! You can now train.")
-    
-    if target_col in dataset.columns:
-        # Features (X) includes demographic info + the Appeal type
-        x = dataset.drop([target_col], axis=1)
-        y = dataset[target_col].astype(str).str.split('┋').str[0].str.strip()
-        
-        if st.button("Train model"):
-            st.write("Training...")
-            le = LabelEncoder()
-            y_encoded = le.fit_transform(y)
-            
-            # Convert all text features (including Appeal) into numbers
-            x_processed = pd.get_dummies(x, drop_first=True).astype(float)
-            
-            x_train, x_test, y_train, y_test = train_test_split(
-                x_processed, y_encoded, test_size=0.2, random_state=42
-            )
-            
-            model = RandomForestClassifier(n_estimators=100, random_state=42)
-            model.fit(x_train, y_train)
-            
-            # Save variables to use them later in the prediction section
-            st.session_state.x_processed = x_processed
-            st.session_state.model = model
-            st.session_state.le = le
-            st.session_state.classes = le.classes_
-            
-            # Find the unique appeals available in the data for the dropdown later
-            # Assuming '7. Which advertisement appeals to you the most?' is the appeal column
-            appeal_col = '7. Which advertisement appeals to you the most?'
-            st.session_state.appeal_options = dataset[appeal_col].unique().tolist()
-            
-            st.success(f"Model trained! Accuracy: {accuracy_score(y_test, model.predict(x_test)):.2f}")
+    # --- STEP 1: DATA CLEANING ---
+    # Define a mapping of the Ad names to the actual "Issue" they address
+    # You can expand this list based on your specific survey ads!
+    ad_to_issue = {
+        "Dream Crazy": "Racial Injustice",
+        "Ford's First Icon": "Gender Equality",
+        "Love Conquers All": "LGBTQ+ Rights",
+        "Don't Buy This Jacket": "Environmentalism"
+    }
 
-if 'model' in st.session_state:
+    def map_ad_to_issue(ad_text):
+        for key, value in ad_to_issue.items():
+            if key in str(ad_text):
+                return value
+        return "Other/General Social"
+
+    # Create the 'Issue' column (our new Target)
+    dataset['Issue'] = dataset['7. Which advertisement appeals to you the most?'].apply(map_ad_to_issue)
+    
+    # Define features based on your EXACT column names
+    feature_cols = [
+        '1. Where are you from?', 
+        '2. How old are you?', 
+        '3. How would you describe your gender identity?', 
+        '4. What is the highest level of education you have?'
+    ]
+    
+    target_col = 'Issue'
+
+    if st.button("Train Model"):
+        st.write("Training model to predict the best issue...")
+        
+        # Prepare X and y
+        X = dataset[feature_cols]
+        y = dataset[target_col]
+        
+        le = LabelEncoder()
+        y_encoded = le.fit_transform(y)
+        
+        X_processed = pd.get_dummies(X, drop_first=True).astype(float)
+        
+        # Train
+        model = RandomForestClassifier(n_estimators=100, random_state=42)
+        model.fit(X_processed, y_encoded)
+        
+        # Save to session state
+        st.session_state.model = model
+        st.session_state.le = le
+        st.session_state.X_columns = X_processed.columns
+        st.session_state.trained = True
+        st.success("Model trained! Ready to predict.")
+
+# --- STEP 2: BRAND INPUT & PREDICTION ---
+if st.session_state.get('trained'):
     st.divider()
-    st.header("Predict the Best Issue to Address")
+    st.header("Brand Strategy: Find Your Focus")
     
-   
-    st.subheader("Commercial Strategy")
-   
-    new_appeal = st.selectbox("Which advertisement appeal will you use?", st.session_state.appeal_options)
-    
-    st.subheader("Target Audience")
-    new_country = st.text_input("Target Country")
-    new_age = st.selectbox("Target Age", ["Under 18", "18-24", "25-34", "35-44", "45-54", "55-64"])
-    new_gender = st.text_input("Gender")
-    new_education = st.selectbox("Education Level", ["High school", "Apprenticeship", "Associate degree", "Bachelor degree", "Graduate or professional degree (e.g. MA or PhD)"])
-    
-    if st.button("Predict Optimal Issue"):
-        # Create dataframe matching the training features
-        # IMPORTANT: Column names must match the Excel exactly
+    st.subheader("Target Audience Details")
+    new_country = st.text_input("Country")
+    new_age = st.selectbox("Age Group", ["Under 18", "18-24", "25-34", "35-44", "45-54", "55-64"])
+    new_gender = st.selectbox("Gender Identity", ["Female", "Male", "Non-binary", "Other"])
+    new_edu = st.selectbox("Education", ["High school", "Bachelor degree", "Graduate degree"])
+
+    if st.button("Predict Best Issue"):
         new_data = pd.DataFrame({
             '1. Where are you from?': [new_country],
             '2. How old are you?': [new_age],
             '3. How would you describe your gender identity?': [new_gender],
-            '4. What is the highest level of education you have?': [new_education],
-            '7. Which advertisement appeals to you the most?': [new_appeal]
+            '4. What is the highest level of education you have?': [new_edu]
         })
         
-        # Process the input just like the training data
+        # Align with training columns
         new_processed = pd.get_dummies(new_data).astype(float)
-        new_processed = new_processed.reindex(columns=st.session_state.x_processed.columns, fill_value=0)
+        new_processed = new_processed.reindex(columns=st.session_state.X_columns, fill_value=0)
         
-        # Predict
-        pred = st.session_state.model.predict(new_processed)
-        pred_class = st.session_state.classes[pred[0]]
+        prediction = st.session_state.model.predict(new_processed)
+        result_issue = st.session_state.le.inverse_transform(prediction)[0]
         
-        st.success("Analysis Complete")
-        st.metric(label="Recommended Issue to Address", value=pred_class)
+        st.metric(label="Recommended Social Issue to Address", value=result_issue)
+        st.write("Based on your target audience's demographics, this issue is most likely to generate high appeal.")
