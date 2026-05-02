@@ -1,66 +1,94 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder
+from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
-st.title("Commercial Appeal Predictor") 
+st.title("Commercial Appeal Predictor")
 
-uploaded_file = st.file_uploader("Upload Excel file", type="xlsx") 
+TARGET = "7. Which advertisement appeals to you the most?"
+FEATURES = [
+    "1. Where are you from?",
+    "2. How old are you?",
+    "3. How would you describe your gender identity?",
+    "4. What is the highest level of education you have?",
+    "6. Do you think it is important for brands to address political/societal issues in commercials?",
+]
+
+uploaded_file = st.file_uploader("Upload Excel file", type="xlsx")
+
 if uploaded_file is not None:
-    dataset = pd.read_excel(uploaded_file)
-    st.write("Data loaded:", dataset.shape) 
-    
-    x = dataset.drop(['7. Which advertisement appeals to you the most?'], axis=1)
-    y = dataset['7. Which advertisement appeals to you the most?']
-    y = y.astype(str).str.split('┋').str[0].str.strip()
-    
+    df = pd.read_excel(uploaded_file)
+
+    df = df[FEATURES + [TARGET]].copy()
+    df[TARGET] = df[TARGET].astype(str).str.split("┋").str[0].str.strip()
+
+    X = df[FEATURES]
+    y = df[TARGET]
+
+    st.write("Rows:", df.shape[0])
+
     if st.button("Train model"):
-        st.write("Training...")
         le = LabelEncoder()
-        y_encoded = le.fit_transform(y)
-        x_processed = pd.get_dummies(x, drop_first=True).astype(float)
-        x_train, x_test, y_train, y_test = train_test_split(
-            x_processed, y_encoded, test_size=0.2, random_state=42
+        y_enc = le.fit_transform(y)
+
+        cat_cols = FEATURES
+        preprocessor = ColumnTransformer([
+            ("cat", Pipeline([
+                ("imputer", SimpleImputer(strategy="most_frequent")),
+                ("ohe", OneHotEncoder(handle_unknown="ignore"))
+            ]), cat_cols)
+        ])
+
+        model = Pipeline([
+            ("preprocessor", preprocessor),
+            ("clf", RandomForestClassifier(n_estimators=200, random_state=42))
+        ])
+
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y_enc, test_size=0.2, random_state=42, stratify=y_enc
         )
-        model = RandomForestClassifier(n_estimators=100, random_state=42)
-        model.fit(x_train, y_train)
-        y_pred = model.predict(x_test)
-        accuracy = accuracy_score(y_test, y_pred)
-        st.success(f"Model trained! Accuracy: {accuracy:.2f}")
-        st.write("Ad classes:", list(le.classes_))  
-        
-        st.session_state.x_processed = x_processed
+
+        model.fit(X_train, y_train)
+        acc = accuracy_score(y_test, model.predict(X_test))
+
+        st.success(f"Model trained! Accuracy: {acc:.2f}")
+        st.write("Classes:", list(le.classes_))
+
         st.session_state.model = model
         st.session_state.le = le
-        st.session_state.classes = le.classes_
 
-if 'model' in st.session_state:
+if "model" in st.session_state:
     st.header("Make Prediction")
-    new_country = st.text_input("Country")
-    new_age = st.selectbox("Age", ["Under 18", "18-24", "25-34", "35-44", "45-54", "55-64"])
-    new_gender = st.text_input("Gender")
-    new_education = st.selectbox("Education Level", ["High school", "Apprenticeship", "Associate degree", "Bachelor degree", "Graduate or professional degree (e.g. MA or PhD)"])
-    
+
+    country = st.text_input("Country")
+    age = st.selectbox("Age", ["Under 18", "18-24", "25-34", "35-44", "45-54", "55-64"])
+    gender = st.selectbox("Gender", ["Female", "Male", "Non-binary", "Woman", "Boy", "Other"])
+    education = st.selectbox(
+        "Education",
+        ["High school", "Apprenticeship", "Associate degree", "Bachelor degree", "Graduate or professional degree (e.g. MA or PhD)"]
+    )
+    important = st.selectbox("Important for brands?", ["yes", "no"])
+
     if st.button("Predict"):
-        if 'x_processed' not in st.session_state:
-            st.error("Please click 'Train model' first!")
-        else:
-            new_data = pd.DataFrame({
-                '1. Where are you from?': [new_country],
-                '2. How old are you?': [new_age],
-                '3. How would you describe your gender identity?': [new_gender],
-                '4. What is the highest level of education you have?': [new_education]
-            })
-            new_processed = pd.get_dummies(new_data, drop_first=True).astype(float)
-            new_processed = new_processed.reindex(columns=st.session_state.x_processed.columns, fill_value=0)
-            
-            pred = st.session_state.model.predict(new_processed)
-            pred_class = st.session_state.classes[pred[0]]
-            pred_proba = st.session_state.model.predict_proba(new_processed)[0]
-            st.write(f"**Predicted ad appeal:** {pred_class}")
-            st.write("**Probabilities:**")
-            for i, prob in enumerate(pred_proba):
-                st.write(f"  {st.session_state.classes[i]}: {prob:.2f}")
+        new_data = pd.DataFrame([{
+            "1. Where are you from?": country,
+            "2. How old are you?": age,
+            "3. How would you describe your gender identity?": gender,
+            "4. What is the highest level of education you have?": education,
+            "6. Do you think it is important for brands to address political/societal issues in commercials?": important,
+        }])
+
+        proba = st.session_state.model.predict_proba(new_data)[0]
+        pred_idx = np.argmax(proba)
+        pred_class = st.session_state.le.inverse_transform([pred_idx])[0]
+
+        st.write(f"**Predicted ad appeal:** {pred_class}")
+        for cls, p in zip(st.session_state.le.classes_, proba):
+            st.write(f"{cls}: {p:.2f}")
