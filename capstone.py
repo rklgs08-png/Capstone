@@ -18,7 +18,6 @@ FEATURES = [
     "2. How old are you?",
     "3. How would you describe your gender identity?",
     "4. What is the highest level of education you have?",
-    "6. Do you think it is important for brands to address political/societal issues in commercials?",
 ]
 
 uploaded_file = st.file_uploader("Upload Excel file", type="xlsx")
@@ -69,7 +68,7 @@ if "model" in st.session_state:
 
     country = st.text_input("Country")
     age = st.selectbox("Age", ["Under 18", "18-24", "25-34", "35-44", "45-54", "55-64"])
-    gender = st.selectbox("Gender", ["Female", "Male", "Non-binary", "Woman", "Boy", "Other"])
+    gender = st.selectbox("Gender", ["Female", "Male", "Non-binary","Other"])
     education = st.selectbox(
         "Education",
         ["High school", "Apprenticeship", "Associate degree", "Bachelor degree", "Graduate or professional degree (e.g. MA or PhD)"]
