@@ -13,9 +13,15 @@ uploaded_file = st.file_uploader("Upload Excel file", type="xlsx")
 if uploaded_file is not None:
     dataset = pd.read_excel(uploaded_file)
     st.write("Data loaded:", dataset.shape) 
+  
     
-    # --- TARGET IS THE ISSUE ---
     target_col = '5. What issue does the commercial address?'
+    
+    if target_col not in dataset.columns:
+        st.error(f"Could not find column: '{target_col}'")
+        st.write("Available columns:", list(dataset.columns))
+    else:
+        st.success(f"Found {target_col}! You can now train.")
     
     if target_col in dataset.columns:
         # Features (X) includes demographic info + the Appeal type
