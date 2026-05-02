@@ -14,8 +14,6 @@ if uploaded_file is not None:
     dataset = pd.read_excel(uploaded_file)
     st.write("Data loaded:", dataset.shape) 
     
-    # Define your columns clearly
-    # I am assuming your new column is named '5. What issue does the commercial address?'
     target_col = '5. What issue does the commercial address?'
 
     
@@ -48,14 +46,6 @@ if uploaded_file is not None:
 if 'model' in st.session_state:
     st.divider()
     st.header("Brand Input: Commercial Strategy")
-    
-    # New Input for the Brand
-    new_issue = st.selectbox("Issue to Address", [
-        "Environmental Challenges", 
-        "Racism and Discrimination", 
-        "Gender equality", 
-        "Queer rights", 
-    ])
     
     st.subheader("Target Audience Demographics")
     new_country = st.text_input("Target Country")
