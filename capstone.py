@@ -1,3 +1,13 @@
+# Add this at the very top of your code
+st.set_page_config(page_title="AdInsight AI", page_icon="📊", layout="wide")
+
+# Add a sidebar for branding
+with st.sidebar:
+    st.image("https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d47353046b7353374b50f.svg", width=50)
+    st.title("AdInsight AI")
+    st.markdown("---")
+    st.info("This AI predicts consumer sentiment based on demographic trends.")
+
 import streamlit as st
 import pandas as pd
 from sklearn.model_selection import train_test_split
