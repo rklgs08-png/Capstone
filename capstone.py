@@ -16,8 +16,8 @@ if uploaded_file is not None:
     
     # Define your columns clearly
     # I am assuming your new column is named '5. What issue does the commercial address?'
-    target_col = '7. Which advertisement appeals to you the most?'
-    issue_col = '5. What issue does the commercial address?'
+    target_col = '5. What issue does the commercial address?'
+
     
     if target_col in dataset.columns:
         x = dataset.drop([target_col], axis=1)
