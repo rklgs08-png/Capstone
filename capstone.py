@@ -1,27 +1,32 @@
-# Add this at the very top of your code
-st.set_page_config(page_title="AdInsight AI", page_icon="📊", layout="wide")
-
-# Add a sidebar for branding
-with st.sidebar:
-    st.image("https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d47353046b7353374b50f.svg", width=50)
-    st.title("AdInsight AI")
-    st.markdown("---")
-    st.info("This AI predicts consumer sentiment based on demographic trends.")
-
 import streamlit as st
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 
+# 1. PAGE CONFIGURATION
+st.set_page_config(page_title="AdInsight AI", page_icon="🧠", layout="wide")
+
+# 2. SIDEBAR BRANDING
+with st.sidebar:
+    st.title("🧠 AdInsight AI")
+    st.markdown("---")
+    st.info("Upload your survey data to train the engine, then enter your target demographic to predict the most effective commercial issue.")
+    st.markdown("Developed for **Brand Strategy Optimization**")
+
+# 3. INITIALIZE MEMORY
+if 'trained' not in st.session_state:
+    st.session_state.trained = False
+
 st.title("Commercial Issue Predictor")
 
-uploaded_file = st.file_uploader("Upload Excel file", type="xlsx")
+# 4. DATA LOADING SECTION
+uploaded_file = st.file_uploader("Upload your survey results (XLSX)", type="xlsx")
 
 if uploaded_file is not None:
-    # Read the file
     dataset = pd.read_excel(uploaded_file)
-
+    
+    # --- DATA MAPPING ---
+    # Connects specific survey ads to broader societal issues
     ad_to_issue = {
         "Dream Crazy": "Racial Injustice",
         "Ford's First Icon": "Gender Equality",
@@ -33,7 +38,7 @@ if uploaded_file is not None:
         for key, value in ad_to_issue.items():
             if key in str(ad_text):
                 return value
-        return "Other/General Social"
+        return "Other Social Issue"
 
     dataset['Issue'] = dataset['7. Which advertisement appeals to you the most?'].apply(map_ad_to_issue)
     
@@ -43,42 +48,47 @@ if uploaded_file is not None:
         '3. How would you describe your gender identity?', 
         '4. What is the highest level of education you have?'
     ]
-    
-    target_col = 'Issue'
 
-    if st.button("Train Model"):
-        st.write("Training model to predict the best issue...")
+    # Use an expander for the technical training part
+    with st.expander("🛠️ AI Engine Training"):
+        if st.button("🚀 Train Model"):
+            with st.status("Analyzing demographics...", expanded=True) as status:
+                X = dataset[feature_cols]
+                y = dataset['Issue']
+                
+                le = LabelEncoder()
+                y_encoded = le.fit_transform(y)
+                X_processed = pd.get_dummies(X, drop_first=True).astype(float)
+                
+                model = RandomForestClassifier(n_estimators=100, random_state=42)
+                model.fit(X_processed, y_encoded)
+                
+                st.session_state.model = model
+                st.session_state.le = le
+                st.session_state.X_columns = X_processed.columns
+                st.session_state.trained = True
+                status.update(label="AI Model Optimized!", state="complete", expanded=False)
+            st.success("The engine is ready for prediction.")
 
-        X = dataset[feature_cols]
-        y = dataset[target_col]
-        
-        le = LabelEncoder()
-        y_encoded = le.fit_transform(y)
-        
-        X_processed = pd.get_dummies(X, drop_first=True).astype(float)
-        
-      
-        model = RandomForestClassifier(n_estimators=100, random_state=42)
-        model.fit(X_processed, y_encoded)
-        
-       
-        st.session_state.model = model
-        st.session_state.le = le
-        st.session_state.X_columns = X_processed.columns
-        st.session_state.trained = True
-        st.success("Model trained! Ready to predict.")
-
-if st.session_state.get('trained'):
+# 5. PREDICTION INTERFACE
+if st.session_state.trained:
     st.divider()
-    st.header("Brand Strategy: Find Your Focus")
+    st.header("🎯 Predict Optimal Commercial Strategy")
     
-    st.subheader("Target Audience Details")
-    new_country = st.text_input("Country")
-    new_age = st.selectbox("Age Group", ["Under 18", "18-24", "25-34", "35-44", "45-54", "55-64"])
-    new_gender = st.selectbox("Gender Identity", ["Female", "Male", "Non-binary", "Other"])
-    new_edu = st.selectbox("Education", ["High school", "Bachelor degree", "Graduate degree"])
+    # Input Dashboard using Columns
+    with st.container(border=True):
+        c1, c2 = st.columns(2)
+        with c1:
+            new_country = st.text_input("Target Country", value="Germany")
+            new_age = st.selectbox("Target Age Group", ["Under 18", "18-24", "25-34", "35-44", "45-54", "55-64"])
+        with c2:
+            new_gender = st.selectbox("Target Gender", ["Female", "Male", "Non-binary", "Other"])
+            new_edu = st.selectbox("Target Education", ["High school", "Bachelor degree", "Graduate degree"])
 
-    if st.button("Predict Issue"):
+        predict_btn = st.button("Generate Strategy Analysis", type="primary", use_container_width=True)
+
+    if predict_btn:
+        # Prepare data
         new_data = pd.DataFrame({
             '1. Where are you from?': [new_country],
             '2. How old are you?': [new_age],
@@ -86,12 +96,30 @@ if st.session_state.get('trained'):
             '4. What is the highest level of education you have?': [new_edu]
         })
         
-      
         new_processed = pd.get_dummies(new_data).astype(float)
         new_processed = new_processed.reindex(columns=st.session_state.X_columns, fill_value=0)
         
+        # Get prediction and probabilities
         prediction = st.session_state.model.predict(new_processed)
+        probs = st.session_state.model.predict_proba(new_processed)[0]
         result_issue = st.session_state.le.inverse_transform(prediction)[0]
         
-        st.metric(label="Recommended Social Issue to Address", value=result_issue)
-        st.write("Based on your target audience's demographics, this issue is most likely to generate high appeal.")
+        # Display Results
+        st.markdown("### Analysis Results")
+        
+        # Top metric showing the winner
+        st.metric(label="Primary Recommended Issue", value=result_issue)
+        
+        # Visualization of Market Resonance
+        prob_df = pd.DataFrame({
+            'Issue': st.session_state.le.classes_,
+            'Appeal Probability': probs
+        }).sort_values('Appeal Probability', ascending=True)
+
+        st.markdown("#### Market Resonance Probability")
+        st.bar_chart(prob_df.set_index('Issue'), horizontal=True)
+        
+        st.toast("Analysis complete!", icon="✅")
+else:
+    if uploaded_file:
+        st.warning("Please expand the 'AI Engine Training' section and click 'Train Model' to begin.")
