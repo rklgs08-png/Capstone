@@ -11,10 +11,7 @@ uploaded_file = st.file_uploader("Upload Excel file", type="xlsx")
 if uploaded_file is not None:
     # Read the file
     dataset = pd.read_excel(uploaded_file)
-    
-    # --- STEP 1: DATA CLEANING ---
-    # Define a mapping of the Ad names to the actual "Issue" they address
-    # You can expand this list based on your specific survey ads!
+
     ad_to_issue = {
         "Dream Crazy": "Racial Injustice",
         "Ford's First Icon": "Gender Equality",
@@ -28,10 +25,8 @@ if uploaded_file is not None:
                 return value
         return "Other/General Social"
 
-    # Create the 'Issue' column (our new Target)
     dataset['Issue'] = dataset['7. Which advertisement appeals to you the most?'].apply(map_ad_to_issue)
     
-    # Define features based on your EXACT column names
     feature_cols = [
         '1. Where are you from?', 
         '2. How old are you?', 
@@ -43,8 +38,7 @@ if uploaded_file is not None:
 
     if st.button("Train Model"):
         st.write("Training model to predict the best issue...")
-        
-        # Prepare X and y
+
         X = dataset[feature_cols]
         y = dataset[target_col]
         
@@ -53,18 +47,17 @@ if uploaded_file is not None:
         
         X_processed = pd.get_dummies(X, drop_first=True).astype(float)
         
-        # Train
+      
         model = RandomForestClassifier(n_estimators=100, random_state=42)
         model.fit(X_processed, y_encoded)
         
-        # Save to session state
+       
         st.session_state.model = model
         st.session_state.le = le
         st.session_state.X_columns = X_processed.columns
         st.session_state.trained = True
         st.success("Model trained! Ready to predict.")
 
-# --- STEP 2: BRAND INPUT & PREDICTION ---
 if st.session_state.get('trained'):
     st.divider()
     st.header("Brand Strategy: Find Your Focus")
@@ -75,7 +68,7 @@ if st.session_state.get('trained'):
     new_gender = st.selectbox("Gender Identity", ["Female", "Male", "Non-binary", "Other"])
     new_edu = st.selectbox("Education", ["High school", "Bachelor degree", "Graduate degree"])
 
-    if st.button("Predict Best Issue"):
+    if st.button("Predict Issue"):
         new_data = pd.DataFrame({
             '1. Where are you from?': [new_country],
             '2. How old are you?': [new_age],
@@ -83,7 +76,7 @@ if st.session_state.get('trained'):
             '4. What is the highest level of education you have?': [new_edu]
         })
         
-        # Align with training columns
+      
         new_processed = pd.get_dummies(new_data).astype(float)
         new_processed = new_processed.reindex(columns=st.session_state.X_columns, fill_value=0)
         
