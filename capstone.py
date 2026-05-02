@@ -60,10 +60,8 @@ if 'model' in st.session_state:
             '2. How old are you?': [new_age],
             '3. How would you describe your gender identity?': [new_gender],
             '4. What is the highest level of education you have?': [new_education],
-            '5. What issue does the commercial address?': [new_issue] 
         })
         
-        # Align columns with training data (handling the dummy variables)
         new_processed = pd.get_dummies(new_data).astype(float)
         new_processed = new_processed.reindex(columns=st.session_state.x_processed.columns, fill_value=0)
         
