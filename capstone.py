@@ -81,7 +81,6 @@ if "model" in st.session_state:
             "2. How old are you?": age,
             "3. How would you describe your gender identity?": gender,
             "4. What is the highest level of education you have?": education,
-            "6. Do you think it is important for brands to address political/societal issues in commercials?": important,
         }])
 
         proba = st.session_state.model.predict_proba(new_data)[0]
