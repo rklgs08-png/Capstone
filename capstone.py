@@ -51,11 +51,10 @@ if 'model' in st.session_state:
     
     # New Input for the Brand
     new_issue = st.selectbox("Issue to Address", [
-        "Sustainability", 
-        "Price Sensitivity", 
-        "Brand Loyalty", 
-        "Social Justice", 
-        "Product Innovation"
+        "Environmental Challenges", 
+        "Racism and Discrimination", 
+        "Gender equality", 
+        "Queer rights", 
     ])
     
     st.subheader("Target Audience Demographics")
