@@ -4,14 +4,12 @@ import plotly.express as px
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 
-# 1. PAGE CONFIGURATION & THEME
 st.set_page_config(
-    page_title="AdInsight AI | Green Edition", 
+    page_title="AdInsight | Green Edition", 
     page_icon="🌿", 
     layout="wide"
 )
 
-# Custom CSS to force light green styling and clean up the UI
 st.markdown("""
     <style>
     /* Main background color */
@@ -45,29 +43,28 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 2. SIDEBAR BRANDING
 with st.sidebar:
-    st.title("🌿 AdInsight AI")
+    st.title("🌿 AdInsight")
     st.markdown("---")
     st.markdown("### **Navigation**")
-    st.info("Upload survey data to train the model, then generate demographic-based predictions.")
+    st.info("Upload your data to generate demographic-based predictions.")
     st.markdown("---")
     st.caption("v2.0 | Green Strategy Mode")
 
-# 3. INITIALIZE MEMORY
+
 if 'trained' not in st.session_state:
     st.session_state.trained = False
 
 st.title("Commercial Issue Predictor")
 st.markdown("##### :green[Analyze and predict social resonance for brand campaigns]")
 
-# 4. DATA LOADING SECTION
+
 uploaded_file = st.file_uploader("Step 1: Upload Survey Results (XLSX)", type="xlsx")
 
 if uploaded_file is not None:
     dataset = pd.read_excel(uploaded_file)
     
-    # --- DATA MAPPING ---
+
     ad_to_issue = {
         "Dream Crazy": "Racial Injustice",
         "Ford's First Icon": "Gender Equality",
@@ -110,7 +107,7 @@ if uploaded_file is not None:
                 status.update(label="Training Complete!", state="complete", expanded=False)
             st.toast("AI model is now live!", icon="🌿")
 
-# 5. PREDICTION INTERFACE
+
 if st.session_state.trained:
     st.divider()
     st.header("🎯 Step 2: Predict Strategy")
