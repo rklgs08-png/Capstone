@@ -59,7 +59,7 @@ st.title("Commercial Issue Predictor")
 st.markdown("##### :green[Analyze and predict social resonance for brand campaigns]")
 
 
-uploaded_file = st.file_uploader("Step 1: Upload Survey Results (XLSX)", type="xlsx")
+uploaded_file = st.file_uploader("🎯Step 1: Upload Survey Results (XLSX)", type="xlsx")
 
 if uploaded_file is not None:
     dataset = pd.read_excel(uploaded_file)
