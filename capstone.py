@@ -87,7 +87,7 @@ if uploaded_file is not None:
         '4. What is the highest level of education you have?'
     ]
 
-    with st.expander("🛠️ AI Engine Configuration"):
+    with st.expander("🛠️ Configuration"):
         if st.button("🚀 Train Engine"):
             with st.status("Processing survey data...", expanded=True) as status:
                 X = dataset[feature_cols]
