@@ -6,7 +6,6 @@ from sklearn.ensemble import RandomForestClassifier
 
 st.set_page_config(
     page_title="AdInsight | Green Edition", 
-    page_icon="🌿", 
     layout="wide"
 )
 
@@ -44,7 +43,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 with st.sidebar:
-    st.title("🌿 AdInsight")
+    st.title("AdInsight")
     st.markdown("---")
     st.markdown("### **Navigation**")
     st.info("Upload your data to generate demographic-based predictions.")
@@ -59,7 +58,7 @@ st.title("Commercial Issue Predictor")
 st.markdown("##### :green[Analyze and predict social resonance for brand campaigns]")
 
 
-uploaded_file = st.file_uploader("🎯Step 1: Upload Survey Results (XLSX)", type="xlsx")
+uploaded_file = st.file_uploader("Step 1: Upload Survey Results (XLSX)", type="xlsx")
 
 if uploaded_file is not None:
     dataset = pd.read_excel(uploaded_file)
@@ -105,12 +104,12 @@ if uploaded_file is not None:
                 st.session_state.X_columns = X_processed.columns
                 st.session_state.trained = True
                 status.update(label="Training Complete!", state="complete", expanded=False)
-            st.toast("AI model is now live!", icon="🌿")
+            st.toast("AI model is now live!")
 
 
 if st.session_state.trained:
     st.divider()
-    st.header("🎯 Step 2: Predict Strategy")
+    st.header("Step 2: Predict Strategy")
     
     with st.container():
         c1, c2 = st.columns(2)
