@@ -48,7 +48,6 @@ with st.sidebar:
     st.markdown("### **Navigation**")
     st.info("Upload your data to generate demographic-based predictions.")
     st.markdown("---")
-    st.caption("v2.0 | Green Strategy Mode")
 
 
 if 'trained' not in st.session_state:
@@ -86,7 +85,7 @@ if uploaded_file is not None:
         '4. What is the highest level of education you have?'
     ]
 
-    with st.expander("🛠️ Configuration"):
+    with st.expander("Configuration"):
         if st.button("🚀 Train Engine"):
             with st.status("Processing survey data...", expanded=True) as status:
                 X = dataset[feature_cols]
@@ -123,7 +122,7 @@ if st.session_state.trained:
         predict_btn = st.button("Run Market Analysis", use_container_width=True)
 
     if predict_btn:
-        # Data Prep
+      
         new_data = pd.DataFrame({
             '1. Where are you from?': [new_country],
             '2. How old are you?': [new_age],
@@ -133,13 +132,12 @@ if st.session_state.trained:
         
         new_processed = pd.get_dummies(new_data).astype(float)
         new_processed = new_processed.reindex(columns=st.session_state.X_columns, fill_value=0)
-        
-        # Prediction & Probabilities
+   
         prediction = st.session_state.model.predict(new_processed)
         probs = st.session_state.model.predict_proba(new_processed)[0]
         result_issue = st.session_state.le.inverse_transform(prediction)[0]
         
-        # Results Display
+     
         st.markdown("### Analysis Results")
         
         col_metric, col_chart = st.columns([1, 2])
@@ -150,7 +148,7 @@ if st.session_state.trained:
             st.write(f"The model suggests focusing on **{result_issue}** to maximize appeal for this specific group.")
         
         with col_chart:
-            # Create a colorful Plotly bar chart
+         
             prob_df = pd.DataFrame({
                 'Issue': st.session_state.le.classes_,
                 'Probability': probs
@@ -163,7 +161,7 @@ if st.session_state.trained:
                 orientation='h',
                 title="Market Resonance Probability",
                 color='Probability',
-                color_continuous_scale='Greens' # Light green to dark green gradient
+                color_continuous_scale='Greens' 
             )
             fig.update_layout(showlegend=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
             st.plotly_chart(fig, use_container_width=True)
